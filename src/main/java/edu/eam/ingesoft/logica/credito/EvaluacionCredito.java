@@ -41,10 +41,8 @@ public class EvaluacionCredito {
      * @return Tasa mensual en porcentaje
      */
     public double calcularTasaMensual(double tasaNominalAnual) {
-        double Tasa_mensual;
-        Tasa_mensual= (tasaNominalAnual/12);
 
-        return Tasa_mensual;
+        return (tasaNominalAnual / 12.0);
     }
     
     /**
@@ -59,13 +57,14 @@ public class EvaluacionCredito {
 
         double Cuota_Mensual;
         double tasa = calcularTasaMensual(tasaNominalAnual);
+        double tasaPorcentaje = tasa / 100.0;
         if ( tasa==0){
             Cuota_Mensual=valorCreditoSolicitado/plazoMeses;
             return Cuota_Mensual;
         }
-        Cuota_Mensual=(valorCreditoSolicitado*tasa*Math.pow(1+tasa,plazoMeses))/(1-Math.pow(1+ tasa, -plazoMeses));
+        Cuota_Mensual=(valorCreditoSolicitado*tasaPorcentaje*Math.pow(1+tasaPorcentaje,plazoMeses))/(Math.pow(1+tasaPorcentaje, -plazoMeses)-1);
 
-        return Cuota_Mensual;
+        return Math.abs(Cuota_Mensual);
     }
 
     /**
@@ -80,27 +79,22 @@ public class EvaluacionCredito {
      */
     public boolean evaluarAprobacion(double tasaNominalAnual, int plazoMeses) {
         double Cuota_mensual = calcularCuotaMensual(tasaNominalAnual, plazoMeses);
-        double porcentaje;
+
         if (puntajeCredito<500) {
         return false ;
     }
     if (puntajeCredito >= 500 && puntajeCredito<=700) {
         if (tieneCodedor) {
-            porcentaje= 0.25 * ingresosMensuales;
-            if (Cuota_mensual<= porcentaje){
-                return true;
-
+            double limite = 0.25 * ingresosMensuales;
+            return Cuota_mensual <= limite;
+        }else {
+            return false;
             }
-            return  false;
-            }
-        }
-     if (puntajeCredito>=700 && numeroCreditosActivos<2 )
-     {
-         if (Cuota_mensual<0.30 * ingresosMensuales){
-               return true;
          }
-         return  false;
-    }
+     if (puntajeCredito> 700 && numeroCreditosActivos<2 ) {
+         double limite = 0.30 * ingresosMensuales;
+         return Cuota_mensual <= limite;
+     }
 
         return false;
     }
