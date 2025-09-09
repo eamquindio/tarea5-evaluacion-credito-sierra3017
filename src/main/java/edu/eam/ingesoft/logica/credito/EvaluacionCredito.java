@@ -41,7 +41,8 @@ public class EvaluacionCredito {
      * @return Tasa mensual en porcentaje
      */
     public double calcularTasaMensual(double tasaNominalAnual) {
-        return 0;
+
+        return (tasaNominalAnual / 12.0);
     }
     
     /**
@@ -53,9 +54,19 @@ public class EvaluacionCredito {
      * @return Valor de la cuota mensual en pesos
      */
     public double calcularCuotaMensual(double tasaNominalAnual, int plazoMeses) {
-        return 0;
+
+        double Cuota_Mensual;
+        double tasa = calcularTasaMensual(tasaNominalAnual);
+        double tasaPorcentaje = tasa / 100.0;
+        if ( tasa==0){
+            Cuota_Mensual=valorCreditoSolicitado/plazoMeses;
+            return Cuota_Mensual;
+        }
+        Cuota_Mensual=(valorCreditoSolicitado*tasaPorcentaje*Math.pow(1+tasaPorcentaje,plazoMeses))/(Math.pow(1+tasaPorcentaje, -plazoMeses)-1);
+
+        return Math.abs(Cuota_Mensual);
     }
-    
+
     /**
      * Evalúa si el crédito debe ser aprobado según las reglas de negocio:
      * - Perfil bajo (puntaje < 500): Rechazo automático
@@ -67,8 +78,24 @@ public class EvaluacionCredito {
      * @return true si el crédito es aprobado, false si es rechazado
      */
     public boolean evaluarAprobacion(double tasaNominalAnual, int plazoMeses) {
+        double Cuota_mensual = calcularCuotaMensual(tasaNominalAnual, plazoMeses);
 
-        
+        if (puntajeCredito<500) {
+        return false ;
+    }
+    if (puntajeCredito >= 500 && puntajeCredito<=700) {
+        if (tieneCodedor) {
+            double limite = 0.25 * ingresosMensuales;
+            return Cuota_mensual <= limite;
+        }else {
+            return false;
+            }
+         }
+     if (puntajeCredito> 700 && numeroCreditosActivos<2 ) {
+         double limite = 0.30 * ingresosMensuales;
+         return Cuota_mensual <= limite;
+     }
+
         return false;
     }
     
